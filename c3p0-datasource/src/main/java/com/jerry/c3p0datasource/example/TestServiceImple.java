@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class TestServiceImple {
+public class    TestServiceImple {
     @Autowired
     private DataSource dataSource;
 
