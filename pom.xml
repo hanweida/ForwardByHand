@@ -12,6 +12,7 @@
         <module>distribute-lock</module>
         <module>example</module>
         <module>flink</module>
+        <module>kafka</module>
     </modules>
 
     <properties>
