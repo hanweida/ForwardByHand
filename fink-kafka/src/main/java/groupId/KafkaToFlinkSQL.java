@@ -10,35 +10,43 @@ public class KafkaToFlinkSQL {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
-        DataStream<String> dataStream = env.fromElements("Alice", "Bob", "John");
+//        DataStream<String> dataStream = env.fromElements("Alice", "Bob", "John");
 
-// interpret the insert-only DataStream as a Table
-        Table inputTable = tableEnv.fromDataStream(dataStream);
-
-// register the Table object as a view and query it
-        tableEnv.createTemporaryView("InputTable", inputTable);
-        Table resultTable = tableEnv.sqlQuery("SELECT UPPER(f0) FROM InputTable");
-
-// interpret the insert-only Table as a DataStream again
-        DataStream<Row> resultStream = tableEnv.toDataStream(resultTable);
-
-// add a printing sink and execute in DataStream API
-        resultStream.print();
-        env.execute();
+//// interpret the insert-only DataStream as a Table
+//        Table inputTable = tableEnv.fromDataStream(dataStream);
+//
+//// register the Table object as a view and query it
+//        tableEnv.createTemporaryView("InputTable", inputTable);
+//        Table resultTable = tableEnv.sqlQuery("SELECT UPPER(f0) FROM InputTable");
+//
+//// interpret the insert-only Table as a DataStream again
+//        DataStream<Row> resultStream = tableEnv.toDataStream(resultTable);
+//
+//// add a printing sink and execute in DataStream API
+//        resultStream.print();
+//        env.execute();
 
 
    String ddlSource = "CREATE TABLE KafkaTable (\n" +
            "  `behavior` STRING \n" +
            ") WITH (\n" +
            "  'connector' = 'kafka',\n" +
-           "  'topic' = 'user_behavior',\n" +
-           "  'properties.bootstrap.servers' = 'localhost:9093',\n" +
-           "  'properties.group.id' = 'testGroup',\n" +
+           "  'topic' = 'test',\n" +
+           "  'properties.bootstrap.servers' = '127.0.0.1:9093',\n" +
+           "  'properties.group.id' = 'jerry',\n" +
            "  'scan.startup.mode' = 'earliest-offset',\n" +
-           "  'format' = 'json'\n" +
+           "  'format' = 'raw'\n" +
            ")";
-    }
 
+        tableEnv.executeSql(ddlSource);
+
+        Table table = tableEnv.from("KafkaTable");
+        Table result = tableEnv.sqlQuery("select behavior from KafkaTable group by behavior");
+
+        DataStream<Row> dataStream = tableEnv.toChangelogStream(result);
+        dataStream.print();
+        env.execute();
+    }
 
 
 //    public static void main(String[] args) throws Exception {
